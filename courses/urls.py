@@ -1,0 +1,24 @@
+from django.urls import path
+from rest_framework import routers
+from courses.views import (CourseViewSet,
+                           LessonListAPIView,
+                           LessonCreateAPIView,
+                           LessonRetrieveAPIView,
+                           LessonUpdateAPIView,
+                           LessonDestroyAPIView,
+                           PaymentViewSet)
+from courses.apps import OnlineSchoolConfig
+
+app_name = OnlineSchoolConfig.name
+
+router = routers.DefaultRouter()
+router.register(r'course', CourseViewSet, basename='course')
+router.register(r'payment', PaymentViewSet, basename='payment')
+
+urlpatterns = [
+    path('lesson/', LessonListAPIView.as_view(), name='lesson_list'),
+    path('lesson/create/', LessonCreateAPIView.as_view(), name='lesson_create'),
+    path('lesson/<int:pk>', LessonRetrieveAPIView.as_view(), name='lesson_detail'),
+    path('lesson/<int:pk>/update', LessonUpdateAPIView.as_view(), name='lesson_update'),
+    path('lesson/<int:pk>/delete', LessonDestroyAPIView.as_view(), name='lesson_delete'),
+] + router.urls
