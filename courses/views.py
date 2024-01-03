@@ -1,14 +1,15 @@
-from django.shortcuts import render
+from rest_framework import status
 from rest_framework import viewsets, generics
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from courses.models import Course, CourseSubscribe, Lesson, Payment
 from courses.pagination import PagintaionThreeTen
 from courses.permissions import CourseModeratorClass, IsCreatorClass, IsModeratorClass, is_moderator, is_su
-from rest_framework.permissions import IsAuthenticated
 from courses.serializers import CourseSerializer, CourseSubscribeSerializer, LessonSerializer, PaymentSerializer
-from courses.models import Course, CourseSubscribe, Lesson, Payment
-from django_filters import rest_framework as filters
-from django.shortcuts import get_object_or_404
-
 from courses.services import SendCourseUpdate
+from .services import PaymentService
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -121,3 +122,13 @@ class CourseSubscribeListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         return CourseSubscribe.objects.filter(user=self.request.user)
+
+
+class PaymentView(APIView):
+    def post(self, request):
+        amount = request.data.get('amount')
+        try:
+            client_secret = PaymentService.create_payment_intent(amount)
+            return Response({'client_secret': client_secret})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
