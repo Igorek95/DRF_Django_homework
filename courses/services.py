@@ -1,16 +1,8 @@
-import os
-
 import stripe
-
-from dotenv import load_dotenv
 from django.conf import settings
 from django.core.mail import send_mail
-
-from config.settings import BASE_DIR
+from celery import shared_task
 from courses.models import CourseSubscribe
-
-dot_env = os.path.join(BASE_DIR, '.env')
-load_dotenv(dotenv_path=dot_env)
 
 
 class SendCourseUpdate:
@@ -21,6 +13,7 @@ class SendCourseUpdate:
         course_subscribes = CourseSubscribe.objects.filter(course=course)
         self.subscriber_mail_list = [sub.user.email for sub in course_subscribes]
 
+    @shared_task
     def send_email(self):
         send_mail(
             self.mail_subject,
@@ -29,9 +22,6 @@ class SendCourseUpdate:
             self.subscriber_mail_list,
             fail_silently=False
         )
-
-
-stripe.api_key = os.getenv('STRIPE_API')
 
 
 class PaymentService:

@@ -54,7 +54,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
         data.user = self.request.user
         data.save()
         SendCourseUpdate(data.course,
-                         f'В курс {data.course.name} был добавлен урок {data.name}.').send_email()
+                         f'В курс {data.course.name} был добавлен урок {data.name}.').send_email.delay()
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
@@ -71,7 +71,7 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
         super().perform_update(serializer)
         data = serializer.save()
         SendCourseUpdate(data.course,
-                         f'В курсе {data.course.name} был изменен урок {data.name}.').send_email()
+                         f'В курс {data.course.name} был добавлен урок {data.name}.').send_email.delay()
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
@@ -87,7 +87,7 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
     def perform_destroy(self, instance):
         super().perform_destroy(instance)
         SendCourseUpdate(instance.course,
-                         f'В курсе {instance.course.name} был удален урок {instance.name}.').send_email()
+                    f'В курсе {instance.course.name} был удален урок {instance.name}.').send_email.delay()
 
 
 class PaymentViewSet(viewsets.ModelViewSet):

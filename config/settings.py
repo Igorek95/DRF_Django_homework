@@ -14,6 +14,8 @@ from datetime import timedelta
 from pathlib import Path
 
 import os
+
+import stripe
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -51,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework',
     'drf_yasg',
+    'django_celery_beat',
 
 ]
 
@@ -191,3 +194,17 @@ if DEBUG:
         'ACCESS_TOKEN_LIFETIME': timedelta(days=90),
         'REFRESH_TOKEN_LIFETIME': timedelta(days=90),
     }
+
+stripe.api_key = os.getenv('STRIPE_API')
+
+### Celery ###
+# URL-адрес брокера сообщений
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+# URL-адрес брокера результатов, также Redis
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+# Часовой пояс для работы Celery
+CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE')
+# Флаг отслеживания выполнения задач
+CELERY_TASK_TRACK_STARTED = os.getenv('CELERY_TASK_TRACK_STARTED') == 'True'
+# Максимальное время на выполнение задачи
+CELERY_TASK_TIME_LIMIT = 30 * 60
