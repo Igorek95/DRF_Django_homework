@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 
 from courses.models import Course, CourseSubscribe, Lesson, Payment
 from courses.pagination import PagintaionThreeTen
-from courses.permissions import CourseModeratorClass, IsCreatorClass, IsModeratorClass, is_moderator, is_su
+from courses.permissions import CourseModeratorClass, IsCreatorClass, \
+    IsModeratorClass, is_moderator, is_su, IsBoughtCourseClass, IsBoughtLessonClass
 from courses.serializers import CourseSerializer, CourseSubscribeSerializer, LessonSerializer, PaymentSerializer
 from courses.services import SendCourseUpdate
 from .services import PaymentService
@@ -14,7 +15,7 @@ from .services import PaymentService
 
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
-    permission_classes = [CourseModeratorClass | IsAuthenticated & ~IsModeratorClass]
+    permission_classes = [CourseModeratorClass|IsAuthenticated&~IsModeratorClass|IsBoughtCourseClass]
     pagination_class = PagintaionThreeTen
 
     def perform_create(self, serializer):
@@ -41,7 +42,7 @@ class LessonListAPIView(generics.ListAPIView):
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsModeratorClass | IsAuthenticated & IsCreatorClass]
+    permission_classes = [IsModeratorClass|IsCreatorClass|IsBoughtLessonClass]
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
@@ -87,7 +88,7 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
     def perform_destroy(self, instance):
         super().perform_destroy(instance)
         SendCourseUpdate(instance.course,
-                    f'В курсе {instance.course.name} был удален урок {instance.name}.').send_email.delay()
+                         f'В курсе {instance.course.name} был удален урок {instance.name}.').send_email.delay()
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
